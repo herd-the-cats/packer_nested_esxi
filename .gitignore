@@ -1,0 +1,14 @@
+.DS_Store
+packer_cache/*
+*_vars.json
+*.box
+iso/*
+output-*-img/*
+output-*-qcow2/*
+output-*-ova/*
+.vagrant/*
+keys/*
+ansible/*ini
+ansible/*retry
+ansible/roles/*
+!.gitkeep
