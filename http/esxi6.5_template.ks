@@ -1,7 +1,7 @@
 # Accept EULA
 vmaccepteula
 # Set serial number
-serialnum --esx=XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
+%include /tmp/serial-include
 # Set root password
 %include /tmp/rootpw-include
 
@@ -14,26 +14,37 @@ reboot
 
 %pre --interpreter=busybox
 vsish -e get /system/bootCmdLine > /tmp/CmdLine
-#printf "HDEBUG: /tmp/CmdLine contains\n$(cat /tmp/CmdLine)\n"
+#printf "DEBUG: /tmp/CmdLine contains\n$(cat /tmp/CmdLine)\n"
 
 for param in $(cat /tmp/CmdLine) ; do
-#  printf "HDEBUG: $param\n"
+#  printf "DEBUG: $param\n"
   case "$param" in
     packer_ks_rootpw=*)
-      printf "HDEBUG: Using value ${param#*=}\n"
+#      printf "DEBUG: Using value ${param#*=}\n"
       export PACKER_ROOTPW="${param#*=}"
     ;;
+    packer_ks_serial=*)
+#      printf "DEBUG: Using value ${param#*=}\n"
+      export PACKER_ESXI_SERIAL="${param#*=}\n"
+    ;;
     *)
-      printf "HDEBUG: Unused parameter: %s\n" "$param"
+      printf "DEBUG: Unused parameter: %s\n" "$param"
     ;;
   esac
 done
 
-if [ ! -z PACKER_ROOTPW ]; then
-  printf "HDEBUG: setting root password to hash $PACKER_ROOTPW\n"
+if [ ! -z $PACKER_ROOTPW ]; then
+#  printf "DEBUG: setting root password to hash $PACKER_ROOTPW\n"
   printf "rootpw --iscrypted %s\n" "$PACKER_ROOTPW" > /tmp/rootpw-include
 else
-  printf "ERROR: no crypted password supplied. Exiting.\n" ; exit 65
+  printf "ERROR: no crypted password supplied. Exiting.\n" ; exit 2
+fi
+
+if [ ! -z $PACKER_ESXI_SERIAL ]; then
+#  printf "DEBUG: setting serial number to $PACKER_ESXI_SERIAL\n"
+  printf "serialnum --esx=%s\n" "$PACKER_ESXI_SERIAL" > /tmp/serial-include
+else
+  printf "ERROR: no serial number value. Exiting.\n" ; exit 3
 fi
 
 %firstboot --interpreter=busybox

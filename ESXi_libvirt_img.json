@@ -1,20 +1,22 @@
 {
   "variables": {
-    "packer_rootpw": "{{env `PACKWRAP_ROOTPW_PLAIN`}}",
-    "esxi_vm_version": "6.0",
-    "esxi_iso_file": "VMware-VMvisor-Installer-6.0.0.update03-5050593.x86_64.iso",
-    "esxi_iso_checksum": "e17586a163b8e32b977b8d0e1c98d3c36fe4e1421b2dc590bab38703db8bf21e"
+    "plain_rootpw": "{{env `PACKWRAP_ROOTPW_PLAIN`}}",
+    "crypted_rootpw": "{{env `PACKWRAP_ROOTPW_CRYPTED`}}",
+    "esxi_vm_version": "6.5",
+    "esxi_iso_url": "file://iso/VMware-VMvisor-Installer-6.5.0.update02-8294253.x86_64.iso",
+    "esxi_iso_checksum": "94b8a1602d442160914140245172cac84b81906ebfc0fd42531c13cb17fe3d7d",
+    "esxi_serial": "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
   },
   "builders": [
     {
       "type": "qemu",
       "name": "libvirt-esxi",
       "boot_command": [
-        "<enter><wait>O<wait> ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/esxi{{user `esxi_vm_version`}}_template.ks packer_ks_rootpw={{user `crypted_rootpw`}}<enter>"
+        "<enter><wait>O<wait> ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/esxi{{user `esxi_vm_version`}}_template.ks packer_ks_rootpw={{user `crypted_rootpw`}} packer_ks_serial={{user `esxi_serial`}}<enter>"
       ],
       "shutdown_command": "esxcli system maintenanceMode set -e true -t 0 ; esxcli system shutdown poweroff -d 10 -r 'Packer Shutdown' ; esxcli system maintenanceMode set -e false -t 0",
       "boot_wait": "3s",
-      "iso_url": "{{user `esxi_iso_file`}}",
+      "iso_url": "{{user `esxi_iso_url`}}",
       "iso_checksum": "{{user `esxi_iso_checksum`}}",
       "iso_checksum_type": "sha256",
       "output_directory": "output-esxi{{user `esxi_vm_version`}}-img",
@@ -26,7 +28,7 @@
       "accelerator": "kvm",
       "http_directory": "http",
       "ssh_username": "root",
-      "ssh_password": "{{user `packer_rootpw`}}",
+      "ssh_password": "{{user `plain_rootpw`}}",
       "ssh_port": 22,
       "ssh_wait_timeout": "3000s",
       "vm_name": "ESXi-{{user `esxi_vm_version`}}-x86-64-{{isotime \"2006-01-02\"}}.raw",
