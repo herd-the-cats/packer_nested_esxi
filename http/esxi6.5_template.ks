@@ -25,7 +25,7 @@ for param in $(cat /tmp/CmdLine) ; do
     ;;
     packer_ks_serial=*)
 #      printf "DEBUG: Using value ${param#*=}\n"
-      export PACKER_ESXI_SERIAL="${param#*=}\n"
+      export PACKER_ESXI_SERIAL="${param#*=}"
     ;;
     *)
       printf "DEBUG: Unused parameter: %s\n" "$param"
@@ -33,14 +33,14 @@ for param in $(cat /tmp/CmdLine) ; do
   esac
 done
 
-if [ ! -z $PACKER_ROOTPW ]; then
+if [ -n $PACKER_ROOTPW ]; then
 #  printf "DEBUG: setting root password to hash $PACKER_ROOTPW\n"
   printf "rootpw --iscrypted %s\n" "$PACKER_ROOTPW" > /tmp/rootpw-include
 else
   printf "ERROR: no crypted password supplied. Exiting.\n" ; exit 2
 fi
 
-if [ ! -z $PACKER_ESXI_SERIAL ]; then
+if [ -n $PACKER_ESXI_SERIAL ]; then
 #  printf "DEBUG: setting serial number to $PACKER_ESXI_SERIAL\n"
   printf "serialnum --esx=%s\n" "$PACKER_ESXI_SERIAL" > /tmp/serial-include
 else
